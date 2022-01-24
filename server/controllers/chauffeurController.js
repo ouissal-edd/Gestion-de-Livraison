@@ -95,6 +95,7 @@ const Prime = async(req,res)=>{
         prix+=livraison.prix 
 
         }))
+         
         
 
         if (totaleDistance === 1000) {
