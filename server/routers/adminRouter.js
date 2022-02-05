@@ -17,7 +17,7 @@ router.get('/logout', LogOut);
 router.post('/createManager', auth, CreateManager);
 router.get('/getManagers', getManager);
 router.delete('/deleteManager/:id', deletManager);
-router.patch('/updateManager/:id', updateManager);
+router.put('/updateManager/:id', updateManager);
 
 
 

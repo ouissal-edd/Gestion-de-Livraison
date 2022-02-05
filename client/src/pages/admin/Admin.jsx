@@ -1,31 +1,37 @@
-import React , {useState,useEffect} from 'react';
-import ManagersList from '../../components/admin/ManagersListe'
-import ManagerForm from '../../components/admin/ManagerForm'
+import React, { useState, useEffect } from 'react';
+import Add from '../../components/add/Add'
 import axios from 'axios';
+import Nav from '../partials/Nav';
+import Table from '../../components/table/Table'
+
 
 
 export const Admin = () => {
-  const [managersData,setData] = useState([]);
-  const getManager = async() =>{
-    const ManagersRes=await axios.get('http://localhost:5000/admin/getManagers')
+  const [managersData, setData] = useState([]);
+  const colNamesA = ['fullName', 'Email', 'Action']
+
+  const getManager = async () => {
+    const ManagersRes = await axios.get('http://localhost:5000/admin/getManagers')
     setData(ManagersRes.data)
-}
+  }
 
   useEffect(() => {
-  getManager();
-},[])
+    getManager();
+  }, [])
 
   return (
-    <div className="flex flex-wrap bg-gray-100 w-full h-screen">
-      <div className="w-9/12">
-        <div className="p-4 text-gray-500">
-        < ManagerForm  getManager={getManager} />
-        <ManagersList managersData={managersData} getManager={getManager} />
+    <div className='flex'>
+      <div className='w-1/6'>
+        <Nav />
+      </div>
+      <div className=" bg-neutral-100 w-5/6 h-auto h-auto" >
+        <div className='p-20'>
+          <Add getManager={getManager} />
+          <Table managersData={managersData} getManager={getManager} colNamesA={colNamesA} />
         </div>
+      </div>
     </div>
-    </div>
-
   )
 };
 
-export default Admin ; 
+export default Admin; 

@@ -2,6 +2,7 @@ const Admin = require('../models/Admin')
 const Manager = require('../models/Manager')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const logger = require('../logger/logger')
 
 
 //   Register Admin
@@ -119,7 +120,12 @@ const Login = async (req, res) => {
         })
         res.cookie('role', existingAdmin.role, {
             httpOnly: true
-        }).send()
+        })
+        res.status(200).json({
+            data: existingAdmin.role
+        }).send();
+
+
 
 
 
@@ -148,31 +154,29 @@ const CreateManager = async (req, res) => {
     try {
 
         const {
-            fullName_M,
-            email_M,
-            password_M,
-            passwordVerify_M
+            fullName,
+            email,
+            password,
+            passwordVerify
         } = req.body;
-        // console.log(fullName_M, email_M, password_M, passwordVerify_M)
-
         //validation 
-        if (!fullName_M || !email_M || !password_M || !passwordVerify_M)
+        if (!fullName || !email || !password || !passwordVerify)
             return res.status(400).json({
                 errorMessage: "please enter amll require fields"
             })
 
-        if (password_M.length < 6)
+        if (password.length < 6)
             return res.status(400).json({
                 errorMessage: "please enter a pass of at last 6 chrt"
             })
 
-        if (password_M !== passwordVerify_M)
+        if (password !== passwordVerify)
             return res.status(400).json({
                 errorMessage: "please enter the same pass"
             })
 
         const existingManager = await Manager.findOne({
-            email_M
+            email
         })
         if (existingManager)
             return res.status(400).json({
@@ -181,13 +185,13 @@ const CreateManager = async (req, res) => {
 
         //hash pass
         const salt = await bcrypt.genSalt()
-        const passwordHash_M = await bcrypt.hash(password_M, salt)
+        const passwordHash_M = await bcrypt.hash(password, salt)
 
         // add new Manager
         const newManager = new Manager({
-            fullName_M,
-            email_M,
-            password_M: passwordHash_M
+            fullName: fullName,
+            email: email,
+            password: passwordHash_M
         })
 
         const savedManager = await newManager.save();
@@ -224,7 +228,7 @@ const deletManager = async (req, res) => {
         logger.info(` Manager: ${id} a ete supprimer par son super admin `)
         res.status(200).json(result)
     } catch (err) {
-        logger.error(`${err}`);
+        console.log(err);
         res.status(400).json({
             error: err
         })
@@ -235,9 +239,12 @@ const deletManager = async (req, res) => {
 
 const updateManager = async (req, res) => {
     console.log(req.params.id);
+    console.log(req.body.fullName,
+        req.body.email,
+    )
     const newManagerUpdate = {
-        fullName_M: req.body.fullName_M,
-        email_M: req.body.email_M,
+        fullName: req.body.fullName,
+        email: req.body.email,
 
     };
     try {
@@ -259,6 +266,8 @@ const updateManager = async (req, res) => {
 }
 
 
+
+
 module.exports = {
     Login,
     LogOut,
@@ -266,5 +275,5 @@ module.exports = {
     CreateManager,
     Register,
     deletManager,
-    updateManager
+    updateManager,
 }

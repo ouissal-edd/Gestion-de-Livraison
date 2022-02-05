@@ -6,7 +6,8 @@ const {
     LogOut,
     Login,
     deletChauffeur,
-    getChauffeur
+    getChauffeur,
+    deleteVehicule
 } = require('../controllers/responsablControllers')
 const auth = require('../middleware/authResponsable')
 
@@ -17,7 +18,10 @@ router.post('/createChauffeur', auth, CreateChauffeur);
 router.post('/createLivraison', auth, CreateLivraison);
 router.get('/getLivraison', auth, getLivraison);
 router.delete('/deleteChauffeur/:id', auth, deletChauffeur);
-router.get('/getChauffeurs', auth, getChauffeur);
+router.delete('/deleteVehicule/:id', deleteVehicule);
+router.get('/getChauffeurs', getChauffeur);
+
+
 
 
 

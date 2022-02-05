@@ -15,7 +15,7 @@ const cors = require('cors')
 app.use(cors({
     origin: ['http://localhost:3000'],
     credentials: true,
-    methods: ['GET', 'POST', 'DELETE', 'PATCH']
+    methods: ['GET', 'POST', 'DELETE', 'PUT']
 }));
 
 // set up server

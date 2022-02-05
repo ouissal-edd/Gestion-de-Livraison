@@ -17,25 +17,25 @@ const Login = async (req, res) => {
 
     try {
         const {
-            email_R,
-            password_R
+            email,
+            password
         } = req.body;
 
         // validation
-        if (!email_R || !password_R)
+        if (!email || !password)
             return res.status(400).json({
                 errorMessage: "please enter amll require fields"
             })
 
         const existingResponsable = await Responsable.findOne({
-            email_R
+            email
         })
         if (!existingResponsable)
             return res.status(401).json({
                 errorMessage: "Wrong email or password"
             })
 
-        const passwordCorrect = await bcrypt.compare(password_R, existingResponsable.password_R)
+        const passwordCorrect = await bcrypt.compare(password, existingResponsable.password)
         if (!passwordCorrect)
             return res.status(401).json({
                 errorMessage: "Wrong email or password"
@@ -53,6 +53,9 @@ const Login = async (req, res) => {
             httpOnly: true
         }).send()
 
+        return res.status(401).json({
+            errorMessage: "Wrong email or password"
+        })
 
 
     } catch (err) {
@@ -77,33 +80,33 @@ const CreateChauffeur = async (req, res) => {
         const responsable = token.user
 
         const {
-            fullName_C,
-            email_C,
-            password_C,
-            passwordVerify_C,
+            fullName,
+            email,
+            password,
+            passwordVerify,
             type,
             matricule
         } = req.body;
-        console.log(fullName_C, email_C, password_C, passwordVerify_C, type, matricule)
+        console.log(fullName, email, password, passwordVerify, type, matricule)
 
         //validation 
-        if (!fullName_C || !email_C || !password_C || !passwordVerify_C || !type || !matricule)
+        if (!fullName || !email || !password || !passwordVerify || !type || !matricule)
             return res.status(400).json({
                 errorMessage: "please enter all require fields"
             })
 
-        if (password_C.length < 6)
+        if (password.length < 6)
             return res.status(400).json({
                 errorMessage: "please enter a pass of at last 6 chrt"
             })
 
-        if (password_C !== passwordVerify_C)
+        if (password !== passwordVerify)
             return res.status(400).json({
                 errorMessage: "please enter the same pass"
             })
 
         const existingChauffeur = await Chauffeur.findOne({
-            email_C
+            email
         })
         if (existingChauffeur)
             return res.status(400).json({
@@ -122,13 +125,13 @@ const CreateChauffeur = async (req, res) => {
 
         //hash pass
         const salt = await bcrypt.genSalt()
-        const passwordHash_C = await bcrypt.hash(password_C, salt)
+        const passwordHash = await bcrypt.hash(password, salt)
 
         // add new Manager
         const newChauffeur = new Chauffeur({
-            fullName_C: fullName_C,
-            email_C: email_C,
-            password_C: passwordHash_C,
+            fullName: fullName,
+            email: email,
+            password: passwordHash,
             responsable: responsable
         })
 
@@ -154,9 +157,9 @@ const CreateChauffeur = async (req, res) => {
         });
         let mailOptions = {
             from: process.env.MAIL,
-            to: email_C,
+            to: email,
             subject: "MarocShip",
-            text: "Hello " + fullName_C + " use this email: " + email_C + " and this password: " + password_C + " to acces into your account via : http://localhost:3000/MarocShip/Chauffeur/login"
+            text: "Hello " + fullName + " use this email: " + email + " and this password: " + password + " to acces into your account via : http://localhost:3000/MarocShip/Chauffeur/login"
 
         };
         transporter.sendMail(mailOptions, (err, data) => {
@@ -195,6 +198,13 @@ const CreateLivraison = async (req, res) => {
             depart,
             arrive
         } = req.body;
+        console.log("first",
+            name,
+            type,
+            poid,
+            zone,
+            depart,
+            arrive)
 
         // get distance
         const distance = await axios(`https://www.distance24.org/route.json?stops=${req.body.depart}|${req.body.arrive}`)
@@ -205,7 +215,7 @@ const CreateLivraison = async (req, res) => {
             .catch((error) => {
                 console.log(error)
             })
-
+        let prix = 332;
 
         // Calcule de Montant de chaque livraison par kg
         if (req.body.zone == "Maroc") {
@@ -227,12 +237,25 @@ const CreateLivraison = async (req, res) => {
             prix = req.body.poid * 260;
         }
 
+        console.log("two",
+            name,
+            type,
+            poid,
+            zone,
+            depart,
+            arrive,
+            distance,
+            prix,
+            responsable,
+        )
+
 
         //validation 
         if (!name || !type || !poid || !zone || !depart || !arrive)
             return res.status(400).json({
                 errorMessage: "please enter all require fields"
             })
+
 
         const newLivraison = new Livraison({
             name: name,
@@ -247,6 +270,7 @@ const CreateLivraison = async (req, res) => {
             status: "disponible"
 
         })
+
 
         const savedLivraison = await newLivraison.save();
 
@@ -278,8 +302,8 @@ const CreateLivraison = async (req, res) => {
                     const reslt = await Chauffeur.findById({
                         _id: voiture[i].chauffeur
                     })
-                    const email = reslt.email_C;
-                    const fullName = reslt.fullName_C;
+                    const email = reslt.email;
+                    const fullName = reslt.fullName;
 
                     await MailToChauffeur(email, fullName, zone, depart, arrive, poid);
 
@@ -290,8 +314,8 @@ const CreateLivraison = async (req, res) => {
                     const reslt = await Chauffeur.findById({
                         _id: petit_camion[i].chauffeur
                     })
-                    const email = reslt.email_C;
-                    const fullName = reslt.fullName_C;
+                    const email = reslt.email;
+                    const fullName = reslt.fullName;
 
                     await MailToChauffeur(email, fullName, zone, depart, arrive, poid);
 
@@ -305,8 +329,8 @@ const CreateLivraison = async (req, res) => {
                     const reslt = await Chauffeur.findById({
                         _id: grand_camion[i].chauffeur
                     })
-                    const email = reslt.email_C;
-                    const fullName = reslt.fullName_C;
+                    const email = reslt.email;
+                    const fullName = reslt.fullName;
 
                     await MailToChauffeur(email, fullName, zone, depart, arrive, poid);
 
@@ -316,8 +340,8 @@ const CreateLivraison = async (req, res) => {
                     const reslt = await Chauffeur.findById({
                         _id: avion[i].chauffeur
                     })
-                    const email = reslt.email_C;
-                    const fullName = reslt.fullName_C;
+                    const email = reslt.email;
+                    const fullName = reslt.fullName;
 
                     await MailToChauffeur(email, fullName, zone, depart, arrive, poid);
 
@@ -369,35 +393,36 @@ const deletChauffeur = async (req, res) => {
 
 }
 
+const deleteVehicule = async (req, res) => {
+    const {
+        id
+    } = req.params
+    const vehicule = {
+        _id: id
+    }
+    try {
+        const result = await Vehicule.deleteOne(vehicule)
+        logger.info(` Vehicule numero : ${id} a ete supprimer `)
+        res.status(200).json(result)
+    } catch (err) {
+        logger.error(`${err}`);
+        res.status(400).json({
+            error: err
+        })
+    }
+
+}
+
+
+
 const getChauffeur = async (req, res) => {
     try {
-
         const jeton = req.cookies.token;
         const token = jwt.decode(jeton)
         const responsable = token.user
 
-        const vehicule = await Vehicule.find().populate('chauffeur');
-        // const vehicule = await Vehicule.aggregate(
-        //     [{
-        //             $lookup: {
-        //                 from: "chauffeurs",
-        //                 localField: "chauffeur",
-        //                 foreignField: "_id",
-        //                 as: "ChauffeurVehicule"
-        //             }
-        //         },
-        //         {
-        //             $unwind: '$ChauffeurVehicule'
-        //         },
-
-        //         {
-        //             $match: {
-        //                 type: "B"
-        //             }
-        //         }
-
-        //     ]
-        // )
+        // const vehicule = await Vehicule.find().populate('chauffeur');
+        const vehicule = await Chauffeur.find();
         res.status(200).json(vehicule)
 
     } catch (err) {
@@ -414,5 +439,6 @@ module.exports = {
     LogOut,
     Login,
     deletChauffeur,
-    getChauffeur
+    getChauffeur,
+    deleteVehicule
 }

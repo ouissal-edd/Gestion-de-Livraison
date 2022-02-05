@@ -1,29 +1,29 @@
 const mongoose = require('mongoose')
 
 
-const responsableShcema=new mongoose.Schema({
-    fullName_R: {
+const responsableShcema = new mongoose.Schema({
+    fullName: {
         type: String,
         required: true
     },
-    email_R : {
+    email: {
         type: String,
         required: true
     },
-    password_R : {
+    password: {
         type: String,
         required: true
     },
     manager: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "manager"
-      },
-      role: {
+    },
+    role: {
         type: String,
         default: "responsable"
-    },  
-    });
+    },
+});
 
-const Responsable = mongoose.model("responsable",responsableShcema);
+const Responsable = mongoose.model("responsable", responsableShcema);
 
 module.exports = Responsable;

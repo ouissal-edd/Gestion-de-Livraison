@@ -1,16 +1,16 @@
 const mongoose = require('mongoose')
 
 // Create Manager
-const managerShcema=new mongoose.Schema({
-    fullName_M : {
+const managerShcema = new mongoose.Schema({
+    fullName: {
         type: String,
         required: true
     },
-    email_M : {
+    email: {
         type: String,
         required: true
     },
-    password_M : {
+    password: {
         type: String,
         required: true
     },
@@ -18,8 +18,8 @@ const managerShcema=new mongoose.Schema({
         type: String,
         default: "manager"
     },
-    });
+});
 
-const Manager = mongoose.model("manager",managerShcema);
+const Manager = mongoose.model("manager", managerShcema);
 
 module.exports = Manager;
